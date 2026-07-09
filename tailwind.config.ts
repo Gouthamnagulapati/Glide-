@@ -11,12 +11,13 @@ const config: Config = {
       },
       keyframes: {
         breathe: {
-          '0%, 100% { opacity: 0.3; transform: scale(1); }': {},
-          '50% { opacity: 0.6; transform: scale(1.1); }': {},
+          '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+          '50%': { opacity: '0.6', transform: 'scale(1.1)' },
         },
       },
     },
   },
   plugins: [],
 };
+
 export default config;
