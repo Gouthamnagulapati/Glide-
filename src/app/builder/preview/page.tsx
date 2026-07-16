@@ -7,140 +7,119 @@ import BreathingBackground from '@/components/BreathingBackground';
 
 export default function PreviewPage() {
   const [data, setData] = useState<any>(null);
-  const resumeRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedData = localStorage.getItem('resume-data');
     if (savedData) {
-      setData(JSON.parse(savedData));
+      try {
+        setData(JSON.parse(savedData));
+      } catch (e) {
+        console.error("Failed to parse resume data:", e);
+      }
     }
   }, []);
 
   const handleDownload = async () => {
-    const element = resumeRef.current;
-    if (!element) return;
-    
+    if (!printRef.current) return;
     try {
-      const canvas = await html2canvas(element, { 
-        scale: 2, 
-        backgroundColor: '#000000',
-        onclone: (clonedDoc) => {
-          // Aggressively remove stylesheets to prevent 'oklab' parsing errors
-          const sheets = clonedDoc.styleSheets;
-          for (let i = 0; i < sheets.length; i++) {
-            try {
-              if (sheets[i].ownerNode) {
-                (sheets[i].ownerNode as HTMLElement).remove();
-              }
-            } catch (e) {
-              console.warn("Could not remove stylesheet", e);
-            }
-          }
-          
-          // Inject basic, compatible styles
-          const styleElement = clonedDoc.createElement('style');
-          styleElement.innerHTML = `
-            * { color: #ffffff !important; background-color: #000000 !important; font-family: sans-serif !important; }
-          `;
-          clonedDoc.head.appendChild(styleElement);
-        }
-      });
-
+      // Background set to white for professional PDF export
+      const canvas = await html2canvas(printRef.current, { scale: 2, backgroundColor: '#ffffff' });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      
-      const fileName = data?.personal?.fullName 
-        ? `${data.personal.fullName.replace(/\s+/g, '_')}_Resume.pdf` 
-        : 'Resume.pdf';
-        
-      pdf.save(fileName);
+      pdf.save(`${data?.personal?.fullName || 'Resume'}.pdf`);
     } catch (error) {
       console.error("PDF generation failed:", error);
-      alert("PDF generation failed. Please check the console for details.");
     }
   };
 
-  if (!data) return <main className="min-h-screen bg-black text-white p-20">Loading Composition...</main>;
+  if (!data) return <main className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</main>;
 
   return (
-    <main className="relative min-h-screen w-full flex">
-      {/* BACKGROUND ANIMATION */}
-      <div className="fixed inset-0 z-0">
-        <BreathingBackground />
-      </div>
+    <main className="relative min-h-screen w-full flex text-white overflow-hidden">
+      <div className="fixed inset-0 z-0"><BreathingBackground /></div>
 
-      {/* LEFT: THE RESUME LAYOUT */}
-      <div 
-        ref={resumeRef} 
-        className="relative z-10 w-2/3 p-20 border-r border-white/10 overflow-y-auto bg-black text-white" 
-        id="resume-content"
-      >
-        <header className="mb-12">
-          <h1 className="text-5xl font-black italic tracking-tighter uppercase">{data.personal.fullName}</h1>
-          <p className="text-white/50 mt-2">{data.personal.email} • {data.personal.phone} • {data.personal.location}</p>
-        </header>
-
-        <section className="mb-10">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-4">Experience</h3>
-          {data.experience?.map((exp: any, i: number) => (
-            <div key={i} className="mb-4">
-              <h4 className="font-bold text-lg">{exp.role} @ {exp.company}</h4>
-              <p className="text-white/60 text-sm">{exp.duration}</p>
-              <p className="mt-2 text-white/80">{exp.summary}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="mb-10">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-4">Education</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {data.education && Object.entries(data.education).map(([key, edu]: any) => (
-              <div key={key} className="mb-2">
-                <p className="font-bold">{edu.college || edu.school}</p>
-                <p className="text-sm text-white/60">{edu.degree || edu.year}</p>
-              </div>
-            ))}
+      {/* VISIBLE UI - GLASSMORPHIC */}
+      <div className="relative z-10 w-2/3 p-20 border-r border-white/10 overflow-y-auto bg-black/30 backdrop-blur-md">
+        <h1 className="text-5xl font-black italic uppercase mb-10 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">{data.personal?.fullName}</h1>
+        
+        <div className="space-y-8">
+          <div className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-lg">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50 mb-4">Professional Summary</h2>
+            <p className="text-white/80 leading-relaxed italic">{data.personal?.summary}</p>
           </div>
-        </section>
 
-        <section className="mb-10">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-4">Projects</h3>
-          {data.projects?.map((proj: any, i: number) => (
-            <div key={i} className="mb-4">
-              <h4 className="font-bold">{proj.title}</h4>
-              <p className="text-sm text-blue-400">{proj.techStack}</p>
-              <p className="text-white/80">{proj.description}</p>
-            </div>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50">Experience</h2>
+          {data.experience?.map((e: any, i: number) => (
+            <div key={i} className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm"><p className="font-bold">{e.role} @ {e.company}</p><p className="text-white/60 text-sm">{e.summary}</p></div>
           ))}
-        </section>
 
-        <section className="mb-10">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-4">Certifications</h3>
-          {data.certifications?.map((cert: any, i: number) => (
-            <div key={i} className="flex justify-between mb-2">
-              <p className="font-bold">{cert.name} <span className="text-white/50 font-normal">({cert.issuer})</span></p>
-              <p className="text-sm text-white/60">{cert.year}</p>
-            </div>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50">Projects</h2>
+          {data.projects?.map((p: any, i: number) => (
+            <div key={i} className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm"><p className="font-bold">{p.title}</p><p className="text-white/60 text-sm">{p.description}</p></div>
           ))}
-        </section>
 
-        <button 
-          onClick={handleDownload} 
-          className="mt-10 px-8 py-4 bg-white text-black font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all"
-        >
-          Download Actual PDF
-        </button>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50">Education</h2>
+          {Object.entries(data.education || {}).map(([level, fields]: any, i: number) => (
+            <div key={i} className="p-4 bg-white/5 rounded-lg border border-white/5"><p className="text-blue-400 font-bold uppercase text-xs">{level}</p><p className="text-sm">{Object.values(fields).join(' - ')}</p></div>
+          ))}
+        </div>
+
+        <button onClick={handleDownload} className="mt-10 px-8 py-4 bg-white/10 border border-white/20 backdrop-blur-md font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded-full">Download PDF</button>
       </div>
 
-      {/* RIGHT: THE ATS VALIDATOR */}
       <div className="relative z-10 w-1/3 p-10 bg-black/40 backdrop-blur-xl">
-        <div className="sticky top-10">
-          <ATSValidator resumeData={data} />
+        <ATSValidator resumeData={data} />
+      </div>
+
+      {/* HIDDEN PRINT CONTAINER - PROFESSIONAL WHITE THEME */}
+      <div style={{ position: 'absolute', top: 0, left: 0, opacity: 0, zIndex: -1, pointerEvents: 'none', width: '100%' }}>
+        <div ref={printRef} style={{ padding: '40px', backgroundColor: '#ffffff', color: '#000000', width: '800px', fontFamily: 'sans-serif' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>{data.personal?.fullName}</h1>
+          <div style={{ fontSize: '12px', color: '#555', marginBottom: '20px' }}>
+            {data.personal?.email} | {data.personal?.phone} | {data.personal?.location}
+          </div>
+          
+          <h3 style={{ fontSize: '14px', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '10px' }}>PROFESSIONAL SUMMARY</h3>
+          <p style={{ fontSize: '13px', marginBottom: '20px', lineHeight: '1.4' }}>{data.personal?.summary}</p>
+
+          <h3 style={{ fontSize: '14px', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '10px' }}>EXPERIENCE</h3>
+          {data.experience?.map((e: any, i: number) => (
+            <div key={i} style={{ marginBottom: '15px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 'bold', margin: 0 }}>{e.role} at {e.company}</p>
+              <p style={{ fontSize: '12px', color: '#333', marginTop: '2px' }}>{e.summary}</p>
+            </div>
+          ))}
+
+          <h3 style={{ fontSize: '14px', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '10px' }}>PROJECTS</h3>
+          {data.projects?.map((p: any, i: number) => (
+            <div key={i} style={{ marginBottom: '10px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 'bold', margin: 0 }}>{p.title}</p>
+              <p style={{ fontSize: '12px', color: '#333', marginTop: '2px' }}>{p.description}</p>
+            </div>
+          ))}
+
+          <div style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ fontSize: '14px', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '10px' }}>EDUCATION</h3>
+              {Object.entries(data.education || {}).map(([level, fields]: any, i: number) => (
+                <div key={i} style={{ marginBottom: '8px' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 'bold' }}>{level.toUpperCase()}</p>
+                  <p style={{ fontSize: '11px' }}>{Object.values(fields).join(', ')}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ fontSize: '14px', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '10px' }}>SKILLS & CERTIFICATIONS</h3>
+              <p style={{ fontSize: '12px' }}>{Object.values(data.skills || {}).join(', ')}</p>
+              {data.certifications?.map((c: any, i: number) => (
+                <p key={i} style={{ fontSize: '12px', margin: '0 0 5px 0' }}>{c.name} ({c.issuer})</p>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </main>

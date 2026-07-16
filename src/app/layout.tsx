@@ -1,7 +1,8 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ResumeProvider } from "@/context/ResumeContext"; // Step 1: Import the provider
-import "./globals.css";
+import { ResumeProvider } from "@/context/ResumeContext";
+import BreathingBackground from "@/components/BreathingBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +29,8 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        {/* Step 2: Wrap children in the provider */}
+      <body className="min-h-full flex flex-col bg-[#050505] text-white">
+        <BreathingBackground />
         <ResumeProvider>
           {children}
         </ResumeProvider>

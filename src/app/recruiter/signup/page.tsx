@@ -1,112 +1,99 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import BreathingBackground from '@/components/BreathingBackground';
 
 export default function RecruiterSignup() {
-  const [formData, setFormData] = useState({
-    companyName: '',
-    email: '',
-    password: '',
-    website: '',
-    linkedinUrl: '',
-    industry: '',
-    hiringVolume: '',
-    headquarters: ''
-  });
-
-  const supabase = createClient();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleRecruiterSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: { data: { role: 'recruiter' } },
-    });
+    setIsLoading(true);
 
-    if (authError) { alert(authError.message); return; }
-
-    if (authData.user) {
-      const { error: dbError } = await supabase
-        .from('recruiters')
-        .insert([{ 
-          id: authData.user.id, 
-          company_name: formData.companyName,
-          website: formData.website,
-          linkedin_url: formData.linkedinUrl,
-          industry: formData.industry,
-          hiring_volume: formData.hiringVolume,
-          headquarters: formData.headquarters
-        }]);
-
-      if (dbError) { alert('Error: ' + dbError.message); } 
-      else { router.push('/recruiter/dashboard'); }
-    }
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    
+    // Redirect to Recruiter Login
+    router.push('/recruiter/login');
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#050505] relative overflow-hidden py-12">
+    <main className="relative min-h-screen w-full flex items-center justify-center p-4">
+      <BreathingBackground />
       
-      {/* Fluid Conic Background */}
-      <div className="absolute inset-0 z-0">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0deg,#312e81_90deg,#581c87_180deg,#1e3a8a_270deg,transparent_360deg)] opacity-40 blur-3xl"
-        />
-      </div>
-
-      {/* GLIDE Text */}
-      <h1 className="absolute z-10 text-[250px] font-black text-white/[0.15] select-none tracking-tighter pointer-events-none">
-        GLIDE
-      </h1>
-
-      {/* Glass Card */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "circOut" }}
-        className="relative z-20 w-full max-w-lg p-8 bg-[#050505]/50 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+        className="relative z-10 w-full max-w-lg p-8 sm:p-12 bg-black/20 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl"
       >
-        <div className="relative z-30">
-          <h2 className="text-2xl font-bold text-white mb-2">Recruiter Access</h2>
-          <p className="text-white/50 mb-6 text-sm">Fill in these details to begin your onboarding.</p>
-          
-          <form onSubmit={handleSignup} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="companyName" placeholder="Company Name" onChange={handleInputChange} className="md:col-span-2 w-full p-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:border-white/30 transition-all" required />
-            <input name="email" type="email" placeholder="Work Email" onChange={handleInputChange} className="w-full p-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:border-white/30 transition-all" required />
-            <input name="password" type="password" placeholder="Password" onChange={handleInputChange} className="w-full p-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:border-white/30 transition-all" required />
-            <input name="website" placeholder="Company Website" onChange={handleInputChange} className="w-full p-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:border-white/30 transition-all" required />
-            <input name="linkedinUrl" placeholder="LinkedIn Company URL" onChange={handleInputChange} className="w-full p-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:border-white/30 transition-all" required />
-            <input name="industry" placeholder="Industry (e.g. SaaS)" onChange={handleInputChange} className="w-full p-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:border-white/30 transition-all" />
-            
-            <select 
-              name="hiringVolume" 
-              onChange={handleInputChange} 
-              className="w-full p-4 bg-[#050505] border border-white/10 rounded-2xl text-white focus:outline-none focus:border-white/30 transition-all appearance-none"
-            >
-              <option value="" className="bg-[#050505] text-white/50">Expected Monthly Hires</option>
-              <option value="1-5" className="bg-[#050505] text-white">1-5</option>
-              <option value="6-20" className="bg-[#050505] text-white">6-20</option>
-              <option value="20+" className="bg-[#050505] text-white">20+</option>
+        <div className="mb-8">
+          <h1 className="text-3xl font-black text-white">Recruiter Portal</h1>
+          <p className="text-white/40 mt-2">Enter your details to register your organization.</p>
+        </div>
+        
+        <form onSubmit={handleRecruiterSignup} className="space-y-4">
+          {/* Company Details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input 
+              type="text" 
+              placeholder="Company Name" 
+              className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-all"
+              required
+            />
+            <select className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white/50 outline-none focus:border-white/30 transition-all">
+              <option>Company Size</option>
+              <option>1-50</option>
+              <option>51-200</option>
+              <option>201-1000</option>
+              <option>1000+</option>
             </select>
-            
-            <input name="headquarters" placeholder="Headquarters Location" onChange={handleInputChange} className="md:col-span-2 w-full p-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:border-white/30 transition-all" />
-            
-            <button type="submit" className="md:col-span-2 w-full py-4 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-all">
-              Create Account
+          </div>
+
+          {/* User Details */}
+          <input 
+            type="text" 
+            placeholder="Your Job Title" 
+            className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-all"
+            required
+          />
+          <input 
+            type="email" 
+            placeholder="Work Email" 
+            className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-all"
+            required
+          />
+          <input 
+            type="password" 
+            placeholder="Create Password" 
+            className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-all"
+            required
+          />
+          
+          <button 
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all active:scale-[0.98] shadow-lg shadow-white/10 mt-6"
+          >
+            {isLoading ? "Setting up..." : "Create Account"}
+          </button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-white/40 text-sm">
+            Already have an account?{" "}
+            <button 
+              onClick={() => router.push('/recruiter/login')}
+              className="text-white font-bold hover:underline transition-all"
+            >
+              Login here
             </button>
-          </form>
+          </p>
         </div>
       </motion.div>
-    </div>
+    </main>
   );
 }

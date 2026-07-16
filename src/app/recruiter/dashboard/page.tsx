@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
+import ResponsiveGrid from '@/components/responsive/ResponsiveGrid'
 
 const supabase = createClient()
 
@@ -62,10 +63,8 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    // 1. Initial Fetch
     fetchAndSortData(searchTerm);
 
-    // 2. Setup Realtime Subscription
     const channel = supabase
       .channel('realtime:applications')
       .on('postgres_changes', { 
@@ -109,19 +108,25 @@ export default function DashboardPage() {
           {timelineData.length} Candidates Found
         </h2>
         
-        <div className="space-y-2">
+        <ResponsiveGrid variant="list">
           {timelineData.map((row, i) => (
             <div key={row.id || i} className="border-b border-white/5 bg-[#050812]/30">
-              <div className="flex justify-between items-center py-4 px-4 hover:bg-white/[0.05] transition-all">
-                <div className="w-1/3 truncate">
+              <div className="flex flex-col md:flex-row flex-wrap justify-between items-start md:items-center py-4 px-4 gap-y-4 hover:bg-white/[0.05] transition-all">
+                <div className="w-full md:w-1/3 truncate">
                   <p className="text-sm text-white">{row.target_node}</p>
-                  <p className="text-[10px] text-zinc-600">NO SKILLS</p>
+                  <p className="text-[10px] text-zinc-600">
+                    {row.skills_extracted ? row.skills_extracted.toUpperCase() : 'NO SKILLS'}
+                  </p>
                 </div>
                 
-                <span className="text-xs text-zinc-500 w-1/4 text-center">SCORE: {row.ats_match_score || '0'}%</span>
-                <span className="text-xs text-blue-400 w-1/6 text-center">{row.current_milestone}</span>
+                <div className="flex w-full md:w-auto justify-between md:justify-center md:gap-8 text-xs">
+                  <span className="text-zinc-500">
+                    SCORE: {row.ats_match_score ? `${Number(row.ats_match_score).toFixed(1)}%` : '0.0%'}
+                  </span>
+                  <span className="text-blue-400">{row.current_milestone}</span>
+                </div>
                 
-                <div className="flex gap-4 w-1/3 justify-end text-xs">
+                <div className="flex gap-4 w-full md:w-auto justify-between md:justify-end text-xs mt-2 md:mt-0">
                   <button onClick={() => setExpandedRow(expandedRow === i ? null : i)} className="text-green-500 uppercase hover:underline">
                     {expandedRow === i ? "[CLOSE]" : "[RESUME]"}
                   </button>
@@ -146,7 +151,7 @@ export default function DashboardPage() {
               </AnimatePresence>
             </div>
           ))}
-        </div>
+        </ResponsiveGrid>
       </div>
     </div>
   )

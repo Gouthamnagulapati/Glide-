@@ -1,8 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
-// Defining the expected properties to fix the 'any' type errors
 interface StatusTrackerProps {
   applicationId: string;
   initialStatus: string;
@@ -13,14 +12,16 @@ export default function StatusTracker({ applicationId, initialStatus, className 
   const [status, setStatus] = useState(initialStatus);
 
   useEffect(() => {
+    // THIS IS THE LINE YOU ARE MISSING:
+    const supabase = createClient(); 
+    
     const channel = supabase.channel(`status-update-${applicationId}`)
       .on('postgres_changes', { 
         event: 'UPDATE', 
         schema: 'public', 
         table: 'applications',
         filter: `id=eq.${applicationId}` 
-      }, (payload) => {
-        // @ts-ignore - payload.new is dynamic based on database schema
+      }, (payload: any) => { // Adding : any here also fixes the second error
         setStatus(payload.new.current_milestone);
       })
       .subscribe();

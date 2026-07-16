@@ -11,7 +11,15 @@ export default function GlideEngineDashboard() {
   const [mounted, setMounted] = useState(false)
   const [apps, setApps] = useState<any[]>([])
   const [selectedApp, setSelectedApp] = useState<any>(null)
-  const [daysElapsed, setDaysElapsed] = useState(0)
+
+  // Calculate days elapsed based on the actual creation date
+  const calculateDays = (createdAt: string) => {
+    if (!createdAt) return 0
+    const created = new Date(createdAt).getTime()
+    const now = new Date().getTime()
+    const diffInDays = Math.floor((now - created) / (1000 * 60 * 60 * 24))
+    return Math.min(Math.max(diffInDays, 0), 15)
+  }
 
   const fetchApps = async () => {
     const { data } = await supabase.from('applications').select('*')
@@ -20,7 +28,8 @@ export default function GlideEngineDashboard() {
         id: item.id,
         node: item.target_node,
         trans: item.transmission_route,
-        mile: item.current_milestone
+        mile: item.current_milestone,
+        created: item.created_at
       }))
       setApps(formattedApps)
       if (formattedApps.length > 0) {
@@ -35,60 +44,34 @@ export default function GlideEngineDashboard() {
     fetchApps()
 
     const channel = supabase
-      .channel('realtime:applications')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
-        fetchApps()
-      })
+      .channel('schema-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => fetchApps())
       .subscribe()
 
-    const saved = localStorage.getItem('glide-days')
-    if (saved) setDaysElapsed(Number(saved))
-
-    const timer = setInterval(() => {
-      setDaysElapsed((prev) => {
-        const next = prev >= 15 ? 15 : prev + 1
-        localStorage.setItem('glide-days', String(next))
-        return next
-      })
-    }, 3000)
-
-    return () => { 
-      clearInterval(timer)
-      supabase.removeChannel(channel) 
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   if (!mounted) return null
 
+  const daysElapsed = selectedApp ? calculateDays(selectedApp.created) : 0
+
   return (
     <div className="relative h-screen w-full bg-[#030611] overflow-hidden text-zinc-400">
-      {/* AGGRESSIVE BREATHING BACKGROUND */}
       <motion.div 
         className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,_#1a1f35_0%,_#030611_70%)]"
-        animate={{ 
-          scale: [1, 1.2, 1], 
-          opacity: [0.2, 0.8, 0.2] 
-        }}
-        transition={{ 
-          duration: 8, 
-          repeat: Infinity, 
-          ease: "easeInOut" 
-        }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.8, 0.2] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* GLASS UI LAYER */}
       <div className="relative z-10 flex h-screen w-full">
-        {/* SIDEBAR */}
         <aside className="w-64 border-r border-white/10 flex flex-col justify-between py-16 px-10 shrink-0 bg-[#030611]/30 backdrop-blur-2xl">
           <div className="text-white font-bold text-2xl">N</div>
           <div className="flex flex-col gap-16 mt-16 mb-auto">
             <button onClick={() => setView('dashboard')} className={`text-[11px] font-bold tracking-widest text-left ${view === 'dashboard' ? 'text-white' : 'text-zinc-600'}`}>LIQUID TIMELINE</button>
             <button onClick={() => setView('antiscam')} className={`text-[11px] font-bold tracking-widest text-left ${view === 'antiscam' ? 'text-white' : 'text-zinc-600'}`}>ANTI-SCAM SHIELD</button>
           </div>
-          <div className="text-[10px] text-zinc-800"><p className="uppercase tracking-widest">Ledger Bal</p><p className="text-white text-base">₹42.00</p></div>
         </aside>
 
-        {/* MAIN CONTENT */}
         <main className="flex-1 p-16 overflow-y-auto">
           {view === 'dashboard' ? (
             <div>
@@ -98,7 +81,9 @@ export default function GlideEngineDashboard() {
                   <div key={app.id} onClick={() => setSelectedApp(app)} className="grid grid-cols-3 py-6 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors items-center">
                     <span className="text-lg text-white font-medium">{app.node}</span>
                     <span className="text-zinc-500">{app.trans}</span>
-                    <span className={`font-bold tracking-widest ${app.mile === 'Accepted' ? 'text-green-400' : app.mile === 'Rejected' ? 'text-red-500' : 'text-purple-400'}`}>{app.mile}</span>
+                    <span className={`font-bold tracking-widest ${app.mile === 'SHORTLISTED' ? 'text-green-400' : app.mile === 'REJECTED' ? 'text-red-500' : 'text-purple-400'}`}>
+                      {app.mile}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -126,11 +111,11 @@ export default function GlideEngineDashboard() {
           )}
         </main>
 
-        {/* TELEMETRY */}
         <section className="w-[400px] border-l border-white/10 bg-[#030611]/30 p-12 flex flex-col h-screen shrink-0 backdrop-blur-2xl">
           <h2 className="text-[10px] font-bold text-white tracking-[0.2em] uppercase mb-12">
             Telemetry: {selectedApp?.node?.toUpperCase() || 'SYSTEM IDLE'}
           </h2>
+          
           <div className="bg-[#030611]/40 p-8 rounded-lg border border-white/10 mb-8 backdrop-blur-lg">
             <p className="text-[9px] uppercase tracking-[0.2em] mb-6 text-zinc-500">Days Elapsed: {daysElapsed} / 15</p>
             <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -144,7 +129,7 @@ export default function GlideEngineDashboard() {
                 <p className="text-red-500 font-bold uppercase tracking-widest mb-4">Status: Inactivity Threshold Reached</p>
                 <p className="text-zinc-400">System Alert: No movement detected on {selectedApp?.node}.</p>
                 <p>The recruiter is not taking action.</p>
-                <p>Recommendation: Redirect your efforts. Look for other recruiters or alternative channels to ensure your application progresses.</p>
+                <p>Recommendation: Redirect your efforts.</p>
               </div>
             ) : (
               <div className="text-center text-zinc-600 mt-20">

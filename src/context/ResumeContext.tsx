@@ -3,12 +3,12 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 
 // Define the shape of your resume data
 interface ResumeData {
-  personal: { fullName: string; email: string; phone: string; location: string };
+  personal: { fullName: string; email: string; phone: string; location: string; summary: string }; // Added ;
   experience: any[];
   education: any;
   projects: any[];
   certifications: any[];
-  skills: { technical: string; soft: string }; // Added skills property
+  skills: { technical: string; soft: string }; 
 }
 
 const ResumeContext = createContext<{
@@ -17,9 +17,9 @@ const ResumeContext = createContext<{
 } | null>(null);
 
 export const ResumeProvider = ({ children }: { children: ReactNode }) => {
-  // Initial state structure
+  // Initial state structure - added summary: '' here
   const [data, setData] = useState<ResumeData>({
-    personal: { fullName: '', email: '', phone: '', location: '' },
+    personal: { fullName: '', email: '', phone: '', location: '', summary: '' },
     experience: [],
     education: { 
       ten: { school: '', year: '', percentage: '' }, 
@@ -28,7 +28,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     },
     projects: [],
     certifications: [],
-    skills: { technical: '', soft: '' } // Added initial skills state
+    skills: { technical: '', soft: '' }
   });
 
   return (
@@ -38,7 +38,6 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook to use the context easily in any component
 export const useResume = () => {
   const context = useContext(ResumeContext);
   if (!context) {

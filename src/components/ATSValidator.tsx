@@ -1,39 +1,41 @@
 'use client'
 import { calculateScore } from '@/lib/atsEngine';
 
-/**
- * ATSValidator component
- * This component accepts the entire resume object as a prop
- * and calculates the impact score in real-time.
- */
 export default function ATSValidator({ resumeData }: { resumeData: any }) {
-  // The calculation happens on every render. Because this is a child component,
-  // it will re-render and update the score whenever the parent state updates.
   const { score, report } = calculateScore(resumeData);
+  
+  // Dynamic color coding based on industry standards
+  const getScoreColor = (s: number) => {
+    if (s >= 80) return "text-green-400";
+    if (s >= 50) return "text-yellow-400";
+    return "text-red-400";
+  };
 
   return (
-    <div className="bg-black/40 p-6 border border-white/10 rounded-xl backdrop-blur-md">
-      <h2 className="text-xs uppercase tracking-[0.2em] text-white/40 mb-4">
-        Real-Time Impact Score
+    <div className="bg-black/40 p-8 border border-white/10 rounded-2xl backdrop-blur-2xl transition-all duration-500 shadow-2xl">
+      <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50 mb-6">
+        ATS Impact Score
       </h2>
       
-      {/* SCORE DISPLAY */}
-      <div className="text-5xl font-black italic mb-6">
-        {score} <span className="text-xl text-white/20">/ 100</span>
+      <div className="flex items-baseline gap-2 mb-8">
+        <span className={`text-6xl font-black italic ${getScoreColor(score)}`}>
+          {score}
+        </span>
+        <span className="text-xl text-white/30 font-light">/ 100</span>
       </div>
-      
-      {/* DIAGNOSTIC REPORT */}
-      <div className="space-y-3">
+
+      <div className="space-y-4">
         {report.length > 0 ? (
           report.map((item, i) => (
-            <p key={i} className="text-xs text-blue-400 flex items-start">
-              <span className="mr-2">⚡</span> {item}
-            </p>
+            <div key={i} className="flex gap-3 text-xs text-white/60 bg-white/5 p-3 rounded-lg border border-white/5">
+              <span className="text-blue-400 mt-0.5">ⓘ</span>
+              <p>{item}</p>
+            </div>
           ))
         ) : (
-          <p className="text-xs text-green-400">
-            ✅ Resume is fully optimized!
-          </p>
+          <div className="flex items-center gap-2 text-green-400 text-xs font-bold uppercase tracking-widest bg-green-400/10 p-4 rounded-lg">
+            <span>✓</span> Profile Optimized for ATS
+          </div>
         )}
       </div>
     </div>

@@ -27,13 +27,12 @@ export default function BuilderPage() {
   }
 
   const handlePreview = () => {
-    localStorage.setItem('resume-data', JSON.stringify(data))
-    router.push('/builder/preview')
+    localStorage.setItem('resume-data', JSON.stringify(data));
+    router.push('/builder/preview');
   }
 
   return (
     <main className="relative min-h-screen w-full">
-      {/* Background container updated to force full viewport coverage */}
       <div className="fixed inset-0 z-0 h-screen w-full overflow-hidden">
         <BreathingBackground />
       </div>
@@ -48,12 +47,28 @@ export default function BuilderPage() {
           <section className="space-y-6">
             <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50">Personal Details</h2>
             <div className="grid md:grid-cols-2 gap-4">
-              {Object.entries(data.personal).map(([key, value]) => (
-                <input key={key} value={value} onChange={(e) => handleInputChange('personal', key, e.target.value)} placeholder={key.toUpperCase()} className="bg-white/5 border-b border-white/10 p-4 outline-none focus:border-blue-400 transition-all text-white placeholder-white/30" />
-              ))}
+              {Object.entries(data.personal).map(([key, value]) => {
+                if (key === 'summary') return null; // We'll handle this separately
+                return (
+                  <input key={key} value={value as string} onChange={(e) => handleInputChange('personal', key, e.target.value)} placeholder={key.toUpperCase()} className="bg-white/5 border-b border-white/10 p-4 outline-none focus:border-blue-400 transition-all text-white placeholder-white/30" />
+                );
+              })}
+            </div>
+            
+            {/* Professional Summary Section Added Below Personal Details */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50">Professional Summary</label>
+              <textarea 
+                value={data.personal.summary || ''} 
+                onChange={(e) => handleInputChange('personal', 'summary', e.target.value)} 
+                placeholder="Write a brief professional summary..." 
+                className="w-full h-32 bg-white/5 border border-white/10 p-4 outline-none focus:border-blue-400 text-white placeholder-white/30 rounded-lg"
+              />
             </div>
           </section>
 
+          {/* ... Rest of your Education, Skills, Experience sections stay exactly the same ... */}
+          
           <section className="space-y-6">
             <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50">Education</h2>
             {Object.entries(data.education).map(([level, fields]) => (
@@ -75,7 +90,7 @@ export default function BuilderPage() {
             <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50">Skills</h2>
             <div className="grid md:grid-cols-2 gap-4">
               {Object.entries(data.skills).map(([key, value]) => (
-                <input key={key} value={value} onChange={(e) => setData({...data, skills: {...data.skills, [key]: e.target.value}})} placeholder={key.toUpperCase()} className="bg-white/5 border-b border-white/10 p-4 outline-none focus:border-blue-400 transition-all text-white placeholder-white/30" />
+                <input key={key} value={value as string} onChange={(e) => setData({...data, skills: {...data.skills, [key]: e.target.value}})} placeholder={key.toUpperCase()} className="bg-white/5 border-b border-white/10 p-4 outline-none focus:border-blue-400 transition-all text-white placeholder-white/30" />
               ))}
             </div>
           </section>

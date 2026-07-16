@@ -1,61 +1,51 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import BreathingBackground from '@/components/BreathingBackground';
+import PaymentButton from '@/components/PaymentButton';
+import { createClient } from '@/utils/supabase/client';
 
-export default function PaymentPage() {
+export default function Payment() {
+  const [selectedPlan] = useState({ name: 'Professional', price: 199 });
+  const [userId, setUserId] = useState<string | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+    }
+    getUser();
+  }, [supabase]);
+  
   return (
-    <div className="min-h-screen bg-[#030611] text-zinc-300 font-mono flex items-center justify-center p-6 overflow-hidden relative">
+    <main className="relative min-h-screen w-full flex items-center justify-center p-4">
+      <BreathingBackground />
       
-      {/* Fluid Background Animation */}
       <motion.div 
-        animate={{ 
-          background: [
-            "radial-gradient(circle at 20% 30%, #4f46e5 0%, transparent 50%)",
-            "radial-gradient(circle at 80% 70%, #7e22ce 0%, transparent 50%)",
-            "radial-gradient(circle at 20% 30%, #4f46e5 0%, transparent 50%)"
-          ] 
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        className="absolute inset-0 z-0 opacity-30"
-      />
-
-      {/* Main Card - 60% Width */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.95 }} 
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-[60%] border border-white/10 bg-[#050812]/40 backdrop-blur-2xl p-12 rounded-2xl text-center shadow-2xl"
+        className="relative z-10 w-full max-w-lg p-8 bg-black/20 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl"
       >
-        <h1 className="text-purple-500 font-bold tracking-[0.3em] text-xl mb-6 uppercase">
-          Authorization Required
-        </h1>
+        <h1 className="text-2xl font-black text-white mb-6">Complete Payment</h1>
         
-        <p className="text-sm text-zinc-400 mb-10 leading-relaxed max-w-sm mx-auto">
-          Accessing this candidate profile requires a premium verification credit. 
-          Proceed to initiate the secure UPI transaction.
-        </p>
+        <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-8">
+          <div className="flex justify-between text-white">
+            <span>{selectedPlan.name} Plan</span>
+            <span className="font-bold">₹{selectedPlan.price}</span>
+          </div>
+        </div>
 
-        <motion.button 
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          animate={{ 
-            boxShadow: [
-              "0 0 0px rgba(168, 85, 247, 0)", 
-              "0 0 25px rgba(168, 85, 247, 0.5)", 
-              "0 0 0px rgba(168, 85, 247, 0)"
-            ] 
-          }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          onClick={() => alert("Connecting to payment gateway...")}
-          className="bg-purple-600 hover:bg-purple-500 text-white py-4 px-12 rounded-lg text-sm uppercase font-bold tracking-widest transition-all w-full max-w-md"
-        >
-          Initialize UPI Payment
-        </motion.button>
+        <div className="w-full">
+          {/* Passed userId here */}
+          <PaymentButton amount={selectedPlan.price} userId={userId} />
+        </div>
         
-        <p className="mt-8 text-[10px] text-zinc-600 uppercase tracking-[0.3em]">
-          Secure Tunnel v2.6-fluid
+        <p className="text-center mt-6 text-white/30 text-xs">
+          Secure payment powered by Razorpay.
         </p>
       </motion.div>
-    </div>
-  )
+    </main>
+  );
 }
