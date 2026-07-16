@@ -12,7 +12,6 @@ export default function GlideEngineDashboard() {
   const [apps, setApps] = useState<any[]>([])
   const [selectedApp, setSelectedApp] = useState<any>(null)
 
-  // UPDATED: Now returns raw difference without capping at 15
   const calculateDays = (createdAt: string) => {
     if (!createdAt) return 0
     const created = new Date(createdAt).getTime()
@@ -52,8 +51,6 @@ export default function GlideEngineDashboard() {
   if (!mounted) return null
 
   const daysElapsed = selectedApp ? calculateDays(selectedApp.created) : 0
-  
-  // Logic for visual capping of the progress bar at 15
   const displayDays = Math.min(daysElapsed, 15)
   const progressPercentage = (displayDays / 15) * 100
 
@@ -67,9 +64,9 @@ export default function GlideEngineDashboard() {
 
       <div className="relative z-10 flex flex-col lg:flex-row min-h-screen w-full">
         
-        <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-row lg:flex-col justify-between py-6 lg:py-16 px-6 lg:px-10 shrink-0 bg-[#030611]/30 backdrop-blur-2xl">
-          <div className="text-white font-bold text-2xl">N</div>
-          <div className="flex flex-row lg:flex-col gap-6 lg:gap-16 mt-0 lg:mt-16 mb-auto">
+        <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-row lg:flex-col justify-center py-6 px-6 lg:px-10 shrink-0 bg-[#030611]/30 backdrop-blur-2xl">
+          <div className="text-white font-bold text-2xl absolute top-10 left-10">N</div>
+          <div className="flex flex-row lg:flex-col gap-6 lg:gap-16">
             <button onClick={() => setView('dashboard')} className={`text-[11px] font-bold tracking-widest ${view === 'dashboard' ? 'text-white' : 'text-zinc-600'}`}>LIQUID TIMELINE</button>
             <button onClick={() => setView('antiscam')} className={`text-[11px] font-bold tracking-widest ${view === 'antiscam' ? 'text-white' : 'text-zinc-600'}`}>ANTI-SCAM SHIELD</button>
           </div>
@@ -92,57 +89,95 @@ export default function GlideEngineDashboard() {
               </div>
             </div>
           ) : (
-            <div className="max-w-5xl space-y-10">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <h1 className="text-white text-4xl font-bold uppercase tracking-tighter">Anti-Scam Shield</h1>
+            <div className="w-full h-full flex flex-col space-y-6">
+              <div className="flex items-center gap-4 mb-4">
+                <h1 className="text-white text-5xl font-black uppercase tracking-tighter">Anti-Scam Shield</h1>
                 <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full">Protocol Active</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-[#030611]/30 border border-white/10 p-8 rounded-xl backdrop-blur-2xl">
-                  <h3 className="text-white font-bold mb-4">Core Architecture</h3>
-                  <p className="text-[13px] text-zinc-400 leading-relaxed">Glide Engine™ implements a proprietary Layer-7 firewall specifically designed to combat recruitment fraud.</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
+                <div className="bg-[#030611]/50 border border-white/10 p-8 rounded-xl backdrop-blur-xl">
+                  <h3 className="text-white font-bold mb-4 uppercase tracking-widest text-sm">Core Architecture</h3>
+                  <p className="text-[13px] text-zinc-400 leading-relaxed mb-4">
+                    Glide Engine™ leverages a multi-stage Layer-7 filtering architecture. By intercepting inbound recruiter packets, our engine performs real-time heuristic analysis to identify and neutralize fraudulent data injection attempts before they interact with your local environment.
+                  </p>
+                  <p className="text-[13px] text-zinc-400 leading-relaxed">
+                    Our proprietary handshake validation protocol ensures that only verified, cryptographically-signed traffic from authentic ATS origins is permitted to pass through the pipeline.
+                  </p>
                 </div>
-                <div className="bg-[#030611]/30 border border-white/10 p-8 rounded-xl backdrop-blur-2xl">
-                  <h3 className="text-white font-bold mb-4">Threat Landscape</h3>
-                  <ul className="text-[13px] text-zinc-400 space-y-2">
-                    <li>• <span className="text-red-400 font-bold">Block:</span> Predatory Consultancy Scraping</li>
-                    <li>• <span className="text-red-400 font-bold">Block:</span> Malicious ATS Redirects</li>
+
+                <div className="bg-[#030611]/50 border border-white/10 p-8 rounded-xl backdrop-blur-xl">
+                  <h3 className="text-white font-bold mb-4 uppercase tracking-widest text-sm">Threat Neutralization</h3>
+                  <ul className="text-[13px] text-zinc-400 space-y-4">
+                    <li>
+                      <span className="text-red-400 font-bold block">01. DOMAIN SCRAPING</span> 
+                      Automated blocking of unauthorized consultancy domains and bots attempting to fingerprint your internal pipeline configuration or personal data.
+                    </li>
+                    <li>
+                      <span className="text-red-400 font-bold block">02. ATS INJECTION</span> 
+                      Active sanitization of malicious redirects. We intercept and decrypt suspicious outbound requests to prevent unauthorized account linking or data exfiltration.
+                    </li>
+                    <li>
+                      <span className="text-red-400 font-bold block">03. PACKET HEURISTICS</span> 
+                      Real-time anomaly detection identifying non-standard recruiter behavior patterns characteristic of fraudulent phishing operations.
+                    </li>
                   </ul>
+                </div>
+              </div>
+
+              <div className="bg-[#030611]/50 border border-white/10 p-8 rounded-xl backdrop-blur-xl">
+                <h3 className="text-white font-bold mb-6 uppercase tracking-widest text-sm">Protocol Security Status</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="border border-white/5 p-4 rounded bg-white/5"><p className="text-[10px] text-zinc-500">FIREWALL</p><p className="text-white font-bold">ACTIVE</p></div>
+                  <div className="border border-white/5 p-4 rounded bg-white/5"><p className="text-[10px] text-zinc-500">LATENCY</p><p className="text-white font-bold">0.4ms</p></div>
+                  <div className="border border-white/5 p-4 rounded bg-white/5"><p className="text-[10px] text-zinc-500">NODES SECURED</p><p className="text-white font-bold">100%</p></div>
                 </div>
               </div>
             </div>
           )}
         </main>
 
-        <section className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 bg-[#030611]/30 p-8 lg:p-12 flex flex-col backdrop-blur-2xl">
-          <h2 className="text-[10px] font-bold text-white tracking-[0.2em] uppercase mb-8 lg:mb-12">
-            Telemetry: {selectedApp?.node?.toUpperCase() || 'SYSTEM IDLE'}
-          </h2>
-          
-          <div className="bg-[#030611]/40 p-8 rounded-lg border border-white/10 mb-8 backdrop-blur-lg">
-            {/* UPDATED: Displays progress up to 15 */}
-            <p className="text-[9px] uppercase tracking-[0.2em] mb-6 text-zinc-500">Days Elapsed: {displayDays} / 15</p>
-            <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <motion.div className="h-full bg-purple-500" animate={{ width: `${progressPercentage}%` }} transition={{ duration: 0.5 }} />
+        {view === 'dashboard' && (
+          <section className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 bg-[#030611]/30 p-8 lg:p-12 flex flex-col backdrop-blur-2xl">
+            <h2 className="text-[10px] font-bold text-white tracking-[0.2em] uppercase mb-8 lg:mb-12">
+              Telemetry: {selectedApp?.node?.toUpperCase() || 'SYSTEM IDLE'}
+            </h2>
+            
+            <div className="bg-[#030611]/40 p-8 rounded-lg border border-white/10 mb-8 backdrop-blur-lg">
+              <p className="text-[9px] uppercase tracking-[0.2em] mb-6 text-zinc-500">Days Elapsed: {displayDays} / 15</p>
+              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                <motion.div className="h-full bg-purple-500" animate={{ width: `${progressPercentage}%` }} transition={{ duration: 0.5 }} />
+              </div>
             </div>
-          </div>
-          
-          <div className="flex-grow bg-[#030611]/40 border border-white/10 rounded-lg p-8 overflow-y-auto backdrop-blur-lg">
-            {/* UPDATED: Only shows warning once threshold met */}
-            {daysElapsed >= 15 ? (
-              <div className="space-y-4 font-mono text-[11px] text-zinc-300">
-                <p className="text-red-500 font-bold uppercase tracking-widest mb-4">Status: Inactivity Threshold Reached</p>
-                <p className="text-zinc-400">System Alert: No movement detected on {selectedApp?.node}.</p>
-                <p>The recruiter is not taking action.</p>
-                <p>Recommendation: Redirect your efforts.</p>
-              </div>
-            ) : (
-              <div className="text-center text-zinc-600 mt-20">
-                <p className="text-lg">Telemetry Stable.</p>
-              </div>
-            )}
-          </div>
-        </section>
+            
+            <div className="flex-grow bg-[#030611]/40 border border-white/10 rounded-lg p-8 overflow-y-auto backdrop-blur-lg">
+              {selectedApp?.mile === 'REJECTED' ? (
+                <div className="space-y-4 font-mono text-[11px] text-red-400">
+                  <p className="font-bold uppercase tracking-widest mb-4">Status: Application Declined</p>
+                  <p>The recruiter has moved forward with other candidates.</p>
+                  <p>Recommendation: Archive this node.</p>
+                </div>
+              ) : selectedApp?.mile === 'SHORTLISTED' ? (
+                <div className="space-y-4 font-mono text-[11px] text-green-400">
+                  <p className="font-bold uppercase tracking-widest mb-4">Status: Profile Shortlisted</p>
+                  <p>Success: Your profile has been reviewed and accepted.</p>
+                  <p>Recommendation: Monitor your email for interview invites.</p>
+                </div>
+              ) : daysElapsed >= 15 ? (
+                <div className="space-y-4 font-mono text-[11px] text-zinc-300">
+                  <p className="text-red-500 font-bold uppercase tracking-widest mb-4">Status: Inactivity Threshold Reached</p>
+                  <p className="text-zinc-400">System Alert: No movement detected on {selectedApp?.node}.</p>
+                  <p>The recruiter is not taking action.</p>
+                  <p>Recommendation: Redirect your efforts.</p>
+                </div>
+              ) : (
+                <div className="text-center text-zinc-600 mt-20">
+                  <p className="text-lg">Telemetry Stable.</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )
