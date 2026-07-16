@@ -12,7 +12,7 @@ export default function Hub() {
       <BreathingBackground />
       
       {/* Sleek Vertical Floating Dock */}
-      <nav className="fixed left-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-6">
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 lg:left-6 lg:top-1/2 lg:-translate-y-1/2 lg:translate-x-0 z-50 flex flex-row lg:flex-col gap-4 lg:gap-6">
         <button 
           onClick={() => router.push('/hub')}
           className="group flex flex-col items-center gap-2 text-white transition-all"
