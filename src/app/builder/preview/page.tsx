@@ -23,7 +23,6 @@ export default function PreviewPage() {
   const handleDownload = async () => {
     if (!printRef.current) return;
     try {
-      // Background set to white for professional PDF export
       const canvas = await html2canvas(printRef.current, { scale: 2, backgroundColor: '#ffffff' });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -39,12 +38,12 @@ export default function PreviewPage() {
   if (!data) return <main className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</main>;
 
   return (
-    <main className="relative min-h-screen w-full flex text-white overflow-hidden">
+    <main className="relative min-h-screen w-full flex flex-col lg:flex-row text-white overflow-hidden">
       <div className="fixed inset-0 z-0"><BreathingBackground /></div>
 
       {/* VISIBLE UI - GLASSMORPHIC */}
-      <div className="relative z-10 w-2/3 p-20 border-r border-white/10 overflow-y-auto bg-black/30 backdrop-blur-md">
-        <h1 className="text-5xl font-black italic uppercase mb-10 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">{data.personal?.fullName}</h1>
+      <div className="relative z-10 w-full lg:w-2/3 p-6 md:p-20 border-r border-white/10 overflow-y-auto bg-black/30 backdrop-blur-md">
+        <h1 className="text-3xl md:text-5xl font-black italic uppercase mb-10 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">{data.personal?.fullName}</h1>
         
         <div className="space-y-8">
           <div className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-lg">
@@ -68,10 +67,10 @@ export default function PreviewPage() {
           ))}
         </div>
 
-        <button onClick={handleDownload} className="mt-10 px-8 py-4 bg-white/10 border border-white/20 backdrop-blur-md font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded-full">Download PDF</button>
+        <button onClick={handleDownload} className="mt-10 px-8 py-4 bg-white/10 border border-white/20 backdrop-blur-md font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded-full w-full lg:w-auto">Download PDF</button>
       </div>
 
-      <div className="relative z-10 w-1/3 p-10 bg-black/40 backdrop-blur-xl">
+      <div className="relative z-10 w-full lg:w-1/3 p-6 md:p-10 bg-black/40 backdrop-blur-xl">
         <ATSValidator resumeData={data} />
       </div>
 
